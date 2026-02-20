@@ -1,0 +1,23 @@
+# Serve built app from dist/ for production
+DirectoryIndex dist/index.html
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Map /assets/ to dist/assets/ (Vite output)
+  RewriteRule ^assets/(.*)$ dist/assets/$1 [L]
+
+  # API requests - pass through to api/ folder
+  RewriteRule ^api(/|$) - [L]
+
+  # Uploads (QR codes, etc.) - serve directly
+  RewriteRule ^uploads/ - [L]
+
+  # Existing files/dirs - serve directly
+  RewriteCond %{REQUEST_FILENAME} -f
+  RewriteRule ^ - [L]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # SPA fallback: admin, etc. -> serve index.html
+  RewriteRule ^ dist/index.html [L]
+</IfModule>
