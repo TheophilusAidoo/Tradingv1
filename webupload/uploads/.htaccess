@@ -1,4 +1,0 @@
-# Allow serving images, block PHP execution
-<FilesMatch "\.(php|phtml|php3|php4|php5)$">
-  Require all denied
-</FilesMatch>

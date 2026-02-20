@@ -1,0 +1,26 @@
+<?php
+/**
+ * River Trading API - Production config template
+ * Copy to config.php and edit with your cPanel MySQL details
+ */
+
+// Database (cPanel MySQL)
+define('DB_HOST', 'localhost');           // Usually 'localhost' on cPanel
+define('DB_NAME', 'your_db_name');        // e.g. cpanel_user_river_trading
+define('DB_USER', 'your_db_user');        // Your MySQL username
+define('DB_PASS', 'your_db_password');    // Your MySQL password
+define('DB_CHARSET', 'utf8mb4');
+
+// API
+define('API_BASE', '/api/');
+define('CORS_ORIGIN', '*');
+
+// Uploads – change to match your folder (e.g. /river-trading or /)
+define('UPLOAD_BASE', '/River%20trading');  // Or /river-trading if no space
+define('UPLOADS_DIR', dirname(__DIR__) . '/uploads');
+
+define('SESSION_NAME', 'river_session');
+
+error_reporting(E_ALL);
+ini_set('display_errors', '0');
+ini_set('log_errors', '1');
