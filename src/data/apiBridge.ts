@@ -109,6 +109,14 @@ export async function apiChangeLoginPassword(
   await api.users.changeLoginPassword(userId, oldPassword, newPassword)
 }
 
+export async function apiGetMsbApprovalStatus(userId: string): Promise<{ submitted: boolean; status?: string; submittedAt?: string; frontUrl?: string; backUrl?: string; reviewedAt?: string }> {
+  return api.msbApproval.getStatus(userId)
+}
+
+export async function apiSubmitMsbApproval(formData: FormData): Promise<{ success: boolean; id?: string; error?: string }> {
+  return api.msbApproval.submit(formData)
+}
+
 export async function apiAddDocument(
   userId: string,
   type: string,

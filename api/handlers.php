@@ -763,6 +763,7 @@ function serveUploadedImage(string $subdir, string $filename) {
   elseif ($ext === 'gif') $mime = 'image/gif';
   elseif ($ext === 'webp') $mime = 'image/webp';
   elseif ($ext === 'svg') $mime = 'image/svg+xml';
+  elseif ($ext === 'pdf') $mime = 'application/pdf';
   header('Content-Type: ' . $mime);
   header('Cache-Control: public, max-age=86400');
   ob_clean();
@@ -975,6 +976,108 @@ function handleDepositsAccept(PDO $pdo, string $id) {
 
 function handleDepositsDecline(PDO $pdo, string $id) {
   $pdo->prepare("UPDATE deposits SET status = 'declined' WHERE id = ? AND status = 'pending'")->execute([$id]);
+  json(['success' => true]);
+}
+
+// --- MSB APPROVALS ---
+function handleMsbApprovalStatus(PDO $pdo, string $userId) {
+  $stmt = $pdo->prepare("SELECT id, user_id as userId, user_email as userEmail, front_url as frontUrl, back_url as backUrl, status, submitted_at as submittedAt, reviewed_at as reviewedAt FROM msb_approvals WHERE user_id = ?");
+  $stmt->execute([$userId]);
+  $row = $stmt->fetch(PDO::FETCH_ASSOC);
+  if (!$row) {
+    json(['submitted' => false]);
+    return;
+  }
+  json(['submitted' => true, 'status' => $row['status'], 'submittedAt' => $row['submittedAt'], 'frontUrl' => $row['frontUrl'], 'backUrl' => $row['backUrl'], 'reviewedAt' => $row['reviewedAt']]);
+}
+
+function handleMsbApprovalSubmit(PDO $pdo) {
+  try {
+    $userId = $_POST['userId'] ?? '';
+    $userEmail = trim($_POST['userEmail'] ?? '');
+    $frontFile = $_FILES['frontFile'] ?? null;
+    $backFile = $_FILES['backFile'] ?? null;
+
+    if (!$userId || !$userEmail || empty($frontFile['tmp_name']) || empty($backFile['tmp_name'])) {
+      http_response_code(400);
+      json(['success' => false, 'error' => 'User ID, email, front ID image, and back ID image are required']);
+      return;
+    }
+
+    assertUserNotLocked($pdo, $userId);
+
+    $stmt = $pdo->prepare("SELECT id FROM msb_approvals WHERE user_id = ?");
+    $stmt->execute([$userId]);
+    if ($stmt->fetch()) {
+      http_response_code(400);
+      json(['success' => false, 'error' => 'You have already submitted your MSB documents. No need to submit again.']);
+      return;
+    }
+
+    $baseDir = defined('UPLOADS_DIR') ? UPLOADS_DIR : (dirname(__DIR__) . '/uploads');
+    $dir = rtrim($baseDir, '/\\') . '/msb';
+    if (!is_dir($dir)) {
+      @mkdir($dir, 0777, true);
+    }
+
+    $saveFile = function ($file, string $prefix) use ($dir): string {
+      $tmpPath = $file['tmp_name'];
+      if (empty($tmpPath) || !is_uploaded_file($tmpPath)) return '';
+      $ext = strtolower(pathinfo($file['name'] ?? '', PATHINFO_EXTENSION)) ?: 'png';
+      if (!in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf'], true)) $ext = 'png';
+      $filename = $prefix . '_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
+      $path = $dir . DIRECTORY_SEPARATOR . $filename;
+      if (!move_uploaded_file($tmpPath, $path) && !(is_readable($tmpPath) && @copy($tmpPath, $path))) return '';
+      return $filename;
+    };
+
+    $frontFilename = $saveFile($frontFile, 'msb_front');
+    $backFilename = $saveFile($backFile, 'msb_back');
+    if (!$frontFilename || !$backFilename) {
+      http_response_code(500);
+      json(['success' => false, 'error' => 'Failed to save uploaded files']);
+      return;
+    }
+
+    $id = 'msb-' . time() . '-' . bin2hex(random_bytes(4));
+    $pdo->prepare("INSERT INTO msb_approvals (id, user_id, user_email, front_url, back_url, status) VALUES (?, ?, ?, ?, ?, 'pending')")->execute([$id, $userId, $userEmail, $frontFilename, $backFilename]);
+    json(['success' => true, 'id' => $id]);
+  } catch (PDOException $e) {
+    http_response_code(500);
+    json(['success' => false, 'error' => 'Database error: ' . $e->getMessage()]);
+  } catch (Throwable $e) {
+    http_response_code(500);
+    json(['success' => false, 'error' => $e->getMessage()]);
+  }
+}
+
+function handleMsbApprovalsList(PDO $pdo) {
+  $stmt = $pdo->query("SELECT id, user_id as userId, user_email as userEmail, front_url as frontUrl, back_url as backUrl, status, submitted_at as submittedAt, reviewed_at as reviewedAt FROM msb_approvals ORDER BY submitted_at DESC");
+  json($stmt->fetchAll(PDO::FETCH_ASSOC));
+}
+
+function handleMsbApprovalApprove(PDO $pdo, string $id) {
+  $stmt = $pdo->prepare("SELECT * FROM msb_approvals WHERE id = ?");
+  $stmt->execute([$id]);
+  $row = $stmt->fetch(PDO::FETCH_ASSOC);
+  if (!$row) {
+    http_response_code(404);
+    json(['success' => false, 'error' => 'Not found']);
+    return;
+  }
+  $pdo->prepare("UPDATE msb_approvals SET status = 'approved', reviewed_at = NOW() WHERE id = ?")->execute([$id]);
+  json(['success' => true]);
+}
+
+function handleMsbApprovalDecline(PDO $pdo, string $id) {
+  $stmt = $pdo->prepare("SELECT * FROM msb_approvals WHERE id = ?");
+  $stmt->execute([$id]);
+  if (!$stmt->fetch()) {
+    http_response_code(404);
+    json(['success' => false, 'error' => 'Not found']);
+    return;
+  }
+  $pdo->prepare("UPDATE msb_approvals SET status = 'declined', reviewed_at = NOW() WHERE id = ?")->execute([$id]);
   json(['success' => true]);
 }
 

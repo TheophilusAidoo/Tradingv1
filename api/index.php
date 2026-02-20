@@ -30,6 +30,12 @@ if (preg_match('#proof/([^/]+)$#', $uri, $m) && $method === 'GET') {
   serveUploadedImage('proofs', $m[1]);
   exit;
 }
+if (preg_match('#msb/([^/]+)$#', $uri, $m) && $method === 'GET') {
+  require_once __DIR__ . '/config.php';
+  require_once __DIR__ . '/handlers.php';
+  serveUploadedImage('msb', $m[1]);
+  exit;
+}
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -104,6 +110,18 @@ try {
   }
   if (preg_match('#deposits/([^/]+)/accept$#', $uri, $m) && $method === 'POST') { handleDepositsAccept($pdo, $m[1]); exit; }
   if (preg_match('#deposits/([^/]+)/decline$#', $uri, $m) && $method === 'POST') { handleDepositsDecline($pdo, $m[1]); exit; }
+
+  // MSB Approvals
+  if (preg_match('#msb-approval/status$#', $uri) && $method === 'GET') {
+    $userId = $_GET['userId'] ?? '';
+    if (!$userId) { http_response_code(400); echo json_encode(['error' => 'userId required']); exit; }
+    handleMsbApprovalStatus($pdo, $userId);
+    exit;
+  }
+  if (preg_match('#msb-approval$#', $uri) && $method === 'POST') { handleMsbApprovalSubmit($pdo); exit; }
+  if (preg_match('#msb-approvals$#', $uri) && $method === 'GET') { handleMsbApprovalsList($pdo); exit; }
+  if (preg_match('#msb-approvals/([^/]+)/approve$#', $uri, $m) && $method === 'POST') { handleMsbApprovalApprove($pdo, $m[1]); exit; }
+  if (preg_match('#msb-approvals/([^/]+)/decline$#', $uri, $m) && $method === 'POST') { handleMsbApprovalDecline($pdo, $m[1]); exit; }
 
   // Withdrawals
   if (preg_match('#users/([^/]+)/withdrawals$#', $uri, $m) && $method === 'GET') { handleWithdrawalsForUser($pdo, $m[1]); exit; }

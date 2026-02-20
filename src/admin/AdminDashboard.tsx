@@ -13,6 +13,7 @@ import { AdminSettings } from './AdminSettings'
 import { AdminReferralCodes } from './AdminReferralCodes'
 import { AdminPledges } from './AdminPledges'
 import { AdminFeaturesOrders } from './AdminFeaturesOrders'
+import { AdminMsbApprovals } from './AdminMsbApprovals'
 import { useState, useEffect, useCallback } from 'react'
 import { getAllTrades } from '../data/tradesStore'
 import { getReferralCodes } from '../data/referralCodesStore'
@@ -310,6 +311,7 @@ function AdminContent({ pathname }: { pathname: string }) {
   if (pathname === '/admin/users') return <AdminUsers />
   if (pathname === '/admin/referral-codes') return <AdminReferralCodes />
   if (pathname === '/admin/verification') return <AdminVerification />
+  if (pathname === '/admin/msb-approvals') return <AdminMsbApprovals />
   if (pathname === '/admin/deposits') return <AdminDeposits />
   if (pathname === '/admin/withdrawals') return <AdminWithdrawals />
   if (pathname === '/admin/balance') return <AdminBalance />

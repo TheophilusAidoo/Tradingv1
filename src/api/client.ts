@@ -236,6 +236,23 @@ export const api = {
       }),
   },
 
+  msbApproval: {
+    getStatus: (userId: string) =>
+      req<{ submitted: boolean; status?: string; submittedAt?: string; frontUrl?: string; backUrl?: string; reviewedAt?: string }>(
+        `msb-approval/status?userId=${encodeURIComponent(userId)}`
+      ),
+    submit: (formData: FormData) =>
+      reqForm<{ success: boolean; id?: string; error?: string }>('msb-approval', formData),
+  },
+  msbApprovals: {
+    list: () =>
+      req<{ id: string; userId: string; userEmail: string; frontUrl: string; backUrl: string; status: string; submittedAt: string; reviewedAt?: string }[]>('msb-approvals'),
+    approve: (id: string) =>
+      req<{ success: boolean }>(`msb-approvals/${id}/approve`, { method: 'POST' }),
+    decline: (id: string) =>
+      req<{ success: boolean }>(`msb-approvals/${id}/decline`, { method: 'POST' }),
+  },
+
   chat: {
     userUnread: (userId: string, since: string, wait?: number) => {
       const p = new URLSearchParams({ userId, since })

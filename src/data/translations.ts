@@ -106,6 +106,9 @@ export type TranslationKey =
   | 'msbApproval.uploaded'
   | 'msbApproval.front'
   | 'msbApproval.back'
+  | 'msbApproval.submit'
+  | 'msbApproval.alreadySubmitted'
+  | 'msbApproval.noNeedToSubmit'
   | 'customerService.title'
   | 'customerService.loading'
   | 'customerService.noLinks'
@@ -195,6 +198,9 @@ const en: Record<TranslationKey, string> = {
   'msbApproval.uploaded': 'Uploaded',
   'msbApproval.front': 'ID / Passport – Front',
   'msbApproval.back': 'ID / Passport – Back',
+  'msbApproval.submit': 'Submit Documents',
+  'msbApproval.alreadySubmitted': 'You have already submitted',
+  'msbApproval.noNeedToSubmit': 'Your documents have been received. No need to submit again. Admin will review and update your status.',
   'customerService.title': 'CUSTOMER SERVICE',
   'customerService.loading': 'Loading...',
   'customerService.noLinks': 'No support links configured yet. Please contact the administrator.',
@@ -286,6 +292,9 @@ const zh: Record<TranslationKey, string> = {
   'msbApproval.uploaded': '已上传',
   'msbApproval.front': '身份证/护照 – 正面',
   'msbApproval.back': '身份证/护照 – 背面',
+  'msbApproval.submit': '提交文件',
+  'msbApproval.alreadySubmitted': '您已提交',
+  'msbApproval.noNeedToSubmit': '您的文件已收到，无需再次提交。管理员将审核并更新您的状态。',
   'customerService.title': '客户服务',
   'customerService.loading': '加载中...',
   'customerService.noLinks': '暂无客服链接配置，请联系管理员。',

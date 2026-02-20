@@ -29,6 +29,7 @@ const navItems = [
   { path: '/admin/users', label: 'Users', Icon: IoPersonCircleOutline },
   { path: '/admin/referral-codes', label: 'Referral codes', Icon: IoGiftOutline },
   { path: '/admin/verification', label: 'Verification', Icon: IoDocumentTextOutline },
+  { path: '/admin/msb-approvals', label: 'MSB Approvals', Icon: IoDocumentTextOutline },
   { path: '/admin/deposits', label: 'Deposits', Icon: IoArrowDownCircleOutline },
   { path: '/admin/withdrawals', label: 'Withdrawals', Icon: IoArrowUpCircleOutline },
   { path: '/admin/balance', label: 'Balance', Icon: IoWalletOutline },
