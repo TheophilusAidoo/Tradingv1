@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { IoCheckmarkCircleOutline, IoCloseCircleOutline } from './adminIcons'
 import { isApiConfigured } from '../data/apiBridge'
+import { formatDateUTC } from '../utils/dateUtils'
 import { api } from '../api/client'
 
 const API_BASE = (import.meta as { env?: { VITE_API_URL?: string } }).env?.VITE_API_URL ?? ''
@@ -101,7 +102,7 @@ export function AdminMsbApprovals() {
                     <div>
                       <div style={{ fontWeight: 600, marginBottom: 4 }}>{m.userEmail}</div>
                       <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                        Submitted {new Date(m.submittedAt).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })}
+                        Submitted {formatDateUTC(m.submittedAt, { dateStyle: 'short', timeStyle: 'short' })}
                       </div>
                     </div>
                     <div style={{ display: 'flex', gap: 8 }}>
@@ -211,7 +212,7 @@ export function AdminMsbApprovals() {
                       {m.status}
                     </span>
                   </td>
-                  <td>{new Date(m.submittedAt).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })}</td>
+                  <td>{formatDateUTC(m.submittedAt, { dateStyle: 'short', timeStyle: 'short' })}</td>
                 </tr>
               ))}
               {list.length === 0 && !loading && (

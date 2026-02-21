@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useVerification } from '../contexts/VerificationContext'
 import { isApiConfigured, apiGetUserNotifications } from '../data/apiBridge'
+import { formatDateUTC, isoStringUTC } from '../utils/dateUtils'
 import type { UserNotification } from '../data/apiBridge'
 
 interface NotificationsViewProps {
@@ -29,7 +30,7 @@ export function NotificationsView({ open, onClose }: NotificationsViewProps) {
           userId: currentUser.id,
           type: 'account_locked',
           message: 'Your account has been locked. You cannot perform any actions. Contact customer support.',
-          createdAt: new Date().toISOString(),
+          createdAt: isoStringUTC(),
         })
       }
       if (currentUser.balanceFrozen) {
@@ -38,7 +39,7 @@ export function NotificationsView({ open, onClose }: NotificationsViewProps) {
           userId: currentUser.id,
           type: 'balance_frozen',
           message: 'Your balance has been frozen. You cannot withdraw, deposit, or trade.',
-          createdAt: new Date().toISOString(),
+          createdAt: isoStringUTC(),
         })
       }
       setNotifications(derived)
@@ -202,7 +203,7 @@ export function NotificationsView({ open, onClose }: NotificationsViewProps) {
                     letterSpacing: '0.05em',
                   }}
                 >
-                  {new Date(n.createdAt).toLocaleString()}
+                  {formatDateUTC(n.createdAt, { dateStyle: 'short', timeStyle: 'short' })}
                 </div>
                 <div style={{ fontSize: 14, color: 'var(--text)', lineHeight: 1.5 }}>
                   {n.message}

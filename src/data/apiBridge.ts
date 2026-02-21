@@ -4,7 +4,8 @@
  */
 
 import { api, isApiConfigured } from '../api/client'
-import type { AdminUser, AdminDeposit, Trade, WithdrawalRequest } from '../types/admin'
+import { isoStringUTC } from '../utils/dateUtils'
+import type { AdminUser, AdminDeposit, DepositStatus, Trade, WithdrawalRequest } from '../types/admin'
 import type { ReferralCode } from './referralCodesStore'
 
 export { isApiConfigured }
@@ -141,7 +142,7 @@ export async function apiGenerateReferralCode(): Promise<ReferralCode> {
     id: res.id,
     code: res.code,
     status: 'available',
-    createdAt: (res as { createdAt?: string }).createdAt ?? new Date().toISOString(),
+    createdAt: (res as { createdAt?: string }).createdAt ?? isoStringUTC(),
   }
 }
 
@@ -286,6 +287,7 @@ export async function apiGetDeposits(): Promise<AdminDeposit[]> {
     ...d,
     txHash: d.txHash ?? undefined,
     paymentProofUrl: d.paymentProofUrl ?? undefined,
+    status: (d.status ?? 'pending') as DepositStatus,
   }))
 }
 
@@ -295,6 +297,7 @@ export async function apiGetDepositsForUser(userId: string): Promise<AdminDeposi
     ...d,
     txHash: d.txHash ?? undefined,
     paymentProofUrl: d.paymentProofUrl ?? undefined,
+    status: (d.status ?? 'pending') as DepositStatus,
   }))
 }
 
@@ -396,7 +399,7 @@ export async function apiSendChatMessage(
   senderType: 'user' | 'admin' = 'user'
 ): Promise<ChatMessage | null> {
   const res = await api.chat.send(userId, content, senderType)
-  return res.message ?? null
+  return (res.message ?? null) as ChatMessage | null
 }
 
 export async function apiGetChatConversations(): Promise<{ userId: string; email: string; name: string; lastAt: string }[]> {

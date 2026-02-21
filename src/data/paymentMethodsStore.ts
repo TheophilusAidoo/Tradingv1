@@ -1,4 +1,5 @@
 import type { PaymentMethod } from '../types/admin'
+import { nowUTC } from '../utils/dateUtils'
 
 const PAYMENT_METHODS_KEY = 'river_payment_methods'
 
@@ -23,7 +24,7 @@ export function getPaymentMethods(): PaymentMethod[] {
 
 export function addPaymentMethod(method: Omit<PaymentMethod, 'id'>): PaymentMethod[] {
   const methods = load()
-  const id = `pm-${Date.now()}`
+  const id = `pm-${nowUTC()}`
   const next = [...methods, { ...method, id }]
   save(next)
   return next

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useLanguage } from '../contexts/LanguageContext'
 import { useVerification } from '../contexts/VerificationContext'
 import { isApiConfigured, apiGetMsbApprovalStatus, apiSubmitMsbApproval } from '../data/apiBridge'
+import { isoStringUTC } from '../utils/dateUtils'
 
 interface MsbApprovalViewProps {
   open: boolean
@@ -73,7 +74,7 @@ export function MsbApprovalView({ open, onClose }: MsbApprovalViewProps) {
       formData.append('backFile', backFile)
       const res = await apiSubmitMsbApproval(formData)
       if (res.success) {
-        setStatus({ submitted: true, status: 'pending', submittedAt: new Date().toISOString() })
+        setStatus({ submitted: true, status: 'pending', submittedAt: isoStringUTC() })
         setFrontFile(null)
         setBackFile(null)
       } else {

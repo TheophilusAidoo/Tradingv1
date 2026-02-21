@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useVerification } from '../contexts/VerificationContext'
 import { isApiConfigured, apiGetWithdrawalsForUser } from '../data/apiBridge'
+import { formatDateUTC } from '../utils/dateUtils'
 import { getWithdrawals } from '../data/withdrawalsStore'
 import type { WithdrawalRequest } from '../types/admin'
 
@@ -152,7 +153,7 @@ export function WithdrawalHistoryView({ open, onClose }: WithdrawalHistoryViewPr
                     </span>
                   </div>
                   <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                    {w.walletNetwork ?? '—'} · {new Date(w.createdAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}
+                    {w.walletNetwork ?? '—'} · {formatDateUTC(w.createdAt, { dateStyle: 'medium', timeStyle: 'short' })}
                   </div>
                   {w.walletAddress && (
                     <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4, wordBreak: 'break-all' }}>

@@ -19,6 +19,7 @@ import { getAllTrades } from '../data/tradesStore'
 import { getReferralCodes } from '../data/referralCodesStore'
 import { isApiConfigured, apiGetReferralCodes, apiGetTrades } from '../data/apiBridge'
 import type { Trade } from '../types/admin'
+import { formatDateUTC } from '../utils/dateUtils'
 
 /** Normalize date string for parsing (MySQL "Y-m-d H:i:s" -> ISO) */
 function parseDate(dateStr: string): Date {
@@ -220,7 +221,7 @@ function DashboardPage() {
             {[...users].reverse().slice(0, 5).map((u) => (
               <div key={u.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                 <span style={{ fontSize: 13 }}>{u.email}</span>
-                <span style={{ fontSize: 12, color: '#71717a' }}>{new Date(u.registeredAt).toLocaleDateString()}</span>
+                <span style={{ fontSize: 12, color: '#71717a' }}>{formatDateUTC(u.registeredAt, { dateStyle: 'short' })}</span>
               </div>
             ))}
           </div>

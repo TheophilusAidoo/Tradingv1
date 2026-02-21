@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useVerification } from '../contexts/VerificationContext'
 import { isApiConfigured, apiGetPledgesForUser, apiGetPledges, apiCreatePledge } from '../data/apiBridge'
+import { formatCountdownUTC, formatDateUTC, nowUTC, parseAsUTC, isoStringUTC } from '../utils/dateUtils'
 import { getPledgesForUser, createPledgeInStore } from '../data/pledgesStore'
 import type { PledgeStats } from '../data/apiBridge'
 
@@ -36,7 +37,7 @@ const PLAN_CYCLES: Record<string, number> = {
 function computeStatsFromPledges(
   pledges: { planId: string; amount: number; status: string; endsAt: string; createdAt: string; totalEarned?: number }[]
 ): PledgeStats {
-  const now = Date.now()
+  const now = nowUTC()
   let amountMined = 0
   let todayEarnings = 0
   let cumulativeIncome = 0
@@ -44,8 +45,8 @@ function computeStatsFromPledges(
     const amount = Number(p.amount) || 0
     const dailyYield = PLAN_YIELDS[p.planId] ?? 0
     const cycleDays = PLAN_CYCLES[p.planId] ?? 1
-    const created = new Date(p.createdAt).getTime()
-    const ends = new Date(p.endsAt).getTime()
+    const created = parseAsUTC(p.createdAt)
+    const ends = parseAsUTC(p.endsAt)
     const elapsedDays = Math.min(cycleDays, (now - created) / 86400000)
     const dailyEarn = amount * (dailyYield / 100)
     if (p.status === 'active' && now < ends) {
@@ -91,23 +92,11 @@ function mapPledgeFromRaw(p: {
 }
 
 function formatCountdown(endsAt: string): string {
-  if (!endsAt || typeof endsAt !== 'string') return '0:00:00'
-  const normalized = endsAt.includes(' ') && !endsAt.includes('T') ? endsAt.replace(' ', 'T') : endsAt
-  const end = new Date(normalized).getTime()
-  const now = Date.now()
-  if (Number.isNaN(end) || now >= end) return '0:00:00'
-  const diff = Math.max(0, Math.floor((end - now) / 1000))
-  const h = Math.floor(diff / 3600)
-  const m = Math.floor((diff % 3600) / 60)
-  const s = diff % 60
-  return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+  return formatCountdownUTC(endsAt)
 }
 
 function formatDate(dateStr: string): string {
-  if (!dateStr || typeof dateStr !== 'string') return ''
-  const normalized = dateStr.includes(' ') && !dateStr.includes('T') ? dateStr.replace(' ', 'T') : dateStr
-  const d = new Date(normalized)
-  return Number.isNaN(d.getTime()) ? '' : d.toLocaleString()
+  return formatDateUTC(dateStr)
 }
 
 function safeNum(n: number): string {
@@ -207,14 +196,14 @@ export function StakingView({ open, onClose }: StakingViewProps) {
         if (result.pledge) {
           const p = result.pledge as { id?: string; userId?: string; user_id?: string; planId?: string; amount?: number; status?: string; endsAt?: string; ends_at?: string; createdAt?: string; created_at?: string }
           const cycleDays = PLAN_CYCLES[pledgeModal.planId] ?? 4
-          const defaultEnds = new Date(Date.now() + cycleDays * 86400000).toISOString().slice(0, 19).replace('T', ' ')
+          const defaultEnds = new Date(nowUTC() + cycleDays * 86400000).toISOString().slice(0, 19).replace('T', ' ')
           const mapped = {
             id: String(p.id ?? ''),
             planId: String(p.planId ?? pledgeModal.planId),
             amount: Number(p.amount) ?? amt,
             status: p.status ?? 'active',
             endsAt: p.endsAt ?? p.ends_at ?? defaultEnds,
-            createdAt: p.createdAt ?? p.created_at ?? new Date().toISOString(),
+            createdAt: p.createdAt ?? p.created_at ?? isoStringUTC(),
             totalEarned: undefined,
           }
           setPledges((prev) => {

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { isApiConfigured, apiChatUserUnread, apiChatAdminUnread } from '../data/apiBridge'
 import { hasUserUnread, hasAdminUnread } from '../data/chatStore'
+import { isoStringUTC } from '../utils/dateUtils'
 
 const USER_LAST_SEEN_KEY = 'river_chat_user_last_seen'
 const ADMIN_LAST_SEEN_KEY = 'river_chat_admin_last_seen'
@@ -11,7 +12,7 @@ function getStoredSince(key: string): string {
     const s = localStorage.getItem(key)
     if (s) return s
   } catch (_) {}
-  return new Date().toISOString()
+  return isoStringUTC()
 }
 
 function setStoredSince(key: string, value: string) {
@@ -27,7 +28,7 @@ export function useChatUnreadForUser(userId: string | null) {
 
   const markSeen = useCallback(() => {
     if (!userId) return
-    const now = new Date().toISOString()
+    const now = isoStringUTC()
     setStoredSince(`${USER_LAST_SEEN_KEY}_${userId}`, now)
     setHasUnread(false)
     setRestartKey((k) => k + 1)
@@ -75,7 +76,7 @@ export function useChatUnreadForAdmin() {
   const runIdRef = useRef(0)
 
   const markSeen = useCallback(() => {
-    const now = new Date().toISOString()
+    const now = isoStringUTC()
     setStoredSince(ADMIN_LAST_SEEN_KEY, now)
     setHasUnread(false)
     setRestartKey((k) => k + 1)

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { formatDateUTC } from '../utils/dateUtils'
 import { useVerification } from '../contexts/VerificationContext'
 import { isApiConfigured, apiGetDepositsForUser } from '../data/apiBridge'
 
@@ -148,7 +149,7 @@ export function DepositHistoryView({ open, onClose }: DepositHistoryViewProps) {
                     </span>
                   </div>
                   <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                    {d.network} · {new Date(d.createdAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}
+                    {d.network} · {formatDateUTC(d.createdAt, { dateStyle: 'medium', timeStyle: 'short' })}
                   </div>
                 </div>
               ))}

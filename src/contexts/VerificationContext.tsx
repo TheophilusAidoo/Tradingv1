@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react'
 import type { AdminUser } from '../types/admin'
 import { getUsers, getCurrentUserId, setCurrentUserId, addDocumentForUser } from '../data/verificationStore'
+import { nowUTC } from '../utils/dateUtils'
 import { isApiConfigured, apiGetUser, apiAddDocument } from '../data/apiBridge'
 
 interface VerificationContextValue {
@@ -43,7 +44,7 @@ export function VerificationProvider({ children }: { children: ReactNode }) {
         await apiAddDocument(currentUserId, type, url)
         refreshUser()
       } else {
-        const next = addDocumentForUser(currentUserId, { id: `doc-${Date.now()}`, type, url })
+        const next = addDocumentForUser(currentUserId, { id: `doc-${nowUTC()}`, type, url })
         setUsers(next)
       }
     },

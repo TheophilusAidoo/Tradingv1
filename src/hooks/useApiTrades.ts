@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { Trade } from '../types/admin'
+import { parseAsUTC } from '../utils/dateUtils'
 import {
   getTradesForUser,
   executeSpotTrade,
@@ -128,7 +129,7 @@ export function useAdminFeaturesOrders() {
     if (isApiConfigured()) {
       const list = await apiGetTrades()
       const features = list.filter((t) => t.type === 'features')
-      setTrades(features.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()))
+      setTrades(features.sort((a, b) => parseAsUTC(b.createdAt) - parseAsUTC(a.createdAt)))
     } else {
       setTrades(getAllFeaturesOrders())
     }

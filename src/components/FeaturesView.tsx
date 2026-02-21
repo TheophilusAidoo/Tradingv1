@@ -4,6 +4,7 @@ import { useVerification } from '../contexts/VerificationContext'
 import { useFeaturesTrading } from '../hooks/useFeaturesTrading'
 import { getOrderEndsAt } from '../data/tradesStore'
 import { useUserTrades, useProcessExpiredOrders } from '../hooks/useApiTrades'
+import { dateStrUTC, timeStrUTC, nowUTC, formatCountdownShortUTC, formatDateUTC } from '../utils/dateUtils'
 import { TradingChart } from './TradingChart'
 import { PairSelectorModal } from './PairSelectorModal'
 import { BuyUpOrderModal } from './BuyUpOrderModal'
@@ -56,9 +57,8 @@ export function FeaturesView({ pair = 'ETH/USDT', lastPrice: lastPriceProp, chan
     ? `O:${lastCandle.open.toFixed(2)} C:${lastCandle.close.toFixed(2)} H:${lastCandle.high.toFixed(2)} L:${lastCandle.low.toFixed(2)}`
     : `O:${priceStr} C:${priceStr} H:${priceStr} L:${priceStr}`
 
-  const now = new Date()
-  const dateStr = now.toISOString().slice(0, 10)
-  const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+  const dateStr = dateStrUTC()
+  const timeStr = timeStrUTC()
 
   const low24h = stats24h?.lowPrice ?? 1994.94
   const high24h = stats24h?.highPrice ?? 2126.87
@@ -213,10 +213,8 @@ export function FeaturesView({ pair = 'ETH/USDT', lastPrice: lastPriceProp, chan
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {featuresList.slice(0, 10).map((tr) => {
                 const endsAt = getOrderEndsAt(tr)
-                const timeExpired = Date.now() >= endsAt
-                const countdown = !timeExpired
-                  ? `${Math.floor((endsAt - Date.now()) / 60000)}:${String(Math.floor(((endsAt - Date.now()) / 1000) % 60)).padStart(2, '0')}`
-                  : null
+                const timeExpired = nowUTC() >= endsAt
+                const countdown = !timeExpired ? formatCountdownShortUTC(endsAt) : null
                 return (
                   <div
                     key={tr.id}
@@ -256,7 +254,7 @@ export function FeaturesView({ pair = 'ETH/USDT', lastPrice: lastPriceProp, chan
                       <span style={{ color: 'var(--text-muted)' }}>Settling…</span>
                     )}
                     <span style={{ color: 'var(--text-muted)', fontSize: 11 }}>
-                      {new Date(tr.createdAt).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })}
+                      {formatDateUTC(tr.createdAt, { dateStyle: 'short', timeStyle: 'short' })}
                     </span>
                   </div>
                 )

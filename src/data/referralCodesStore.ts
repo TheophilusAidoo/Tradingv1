@@ -1,3 +1,5 @@
+import { nowUTC, isoStringUTC } from '../utils/dateUtils'
+
 export type ReferralCodeStatus = 'available' | 'used'
 
 export interface ReferralCode {
@@ -41,7 +43,7 @@ function generateUniqueCode(existing: ReferralCode[]): string {
       return code
     }
   }
-  return generate5DigitCode() + String(Date.now()).slice(-2)
+  return generate5DigitCode() + String(nowUTC()).slice(-2)
 }
 
 export function getReferralCodes(): ReferralCode[] {
@@ -52,10 +54,10 @@ export function generateReferralCode(): ReferralCode {
   const codes = loadCodes()
   const code = generateUniqueCode(codes)
   const newCode: ReferralCode = {
-    id: `ref_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
+    id: `ref_${nowUTC()}_${Math.random().toString(36).slice(2, 9)}`,
     code,
     status: 'available',
-    createdAt: new Date().toISOString(),
+    createdAt: isoStringUTC(),
   }
   codes.push(newCode)
   saveCodes(codes)
@@ -80,7 +82,7 @@ export function markReferralCodeAsUsed(code: string, usedBy: string): boolean {
     ...codes[idx],
     status: 'used',
     usedBy,
-    usedAt: new Date().toISOString(),
+    usedAt: isoStringUTC(),
   }
   saveCodes(codes)
   return true

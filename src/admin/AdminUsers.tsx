@@ -3,6 +3,7 @@ import { useAdmin } from '../contexts/AdminContext'
 import { adminPageStyles } from './adminStyles'
 import { IoTrashOutline } from './adminIcons'
 import type { AdminUser } from '../types/admin'
+import { formatDateUTC } from '../utils/dateUtils'
 
 export function AdminUsers() {
   const { users, setUserCreditScore, lockUser, freezeUserBalance, deleteUser } = useAdmin()
@@ -125,7 +126,7 @@ export function AdminUsers() {
                     </button>
                   )}
                 </td>
-                <td>{new Date(u.registeredAt).toLocaleDateString(undefined, { dateStyle: 'medium' })}</td>
+                <td>{formatDateUTC(u.registeredAt, { dateStyle: 'medium' })}</td>
                 <td style={{ fontWeight: 600 }}>{Number(u.balanceUsdt).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
                 <td>
                   {u.isAdmin ? (

@@ -1,5 +1,6 @@
 import type { Pledge, PledgeStats } from './apiBridge'
 import { getUsers, saveUsersToStore } from './verificationStore'
+import { nowUTC, parseAsUTC, isoStringUTC } from '../utils/dateUtils'
 
 const PLEDGES_KEY = 'river_pledges'
 
@@ -24,14 +25,14 @@ function savePledges(pledges: Pledge[]) {
   localStorage.setItem(PLEDGES_KEY, JSON.stringify(pledges))
 }
 
-/** Settle matured pledges: credit user balance and mark completed. Uses PLEDGE CYCLE and DAILY YIELD. */
+/** Settle matured pledges: credit user balance and mark completed. Uses PLEDGE CYCLE and DAILY YIELD. UTC-based. */
 function settleMaturedPledges(userId: string): void {
   const pledges = loadPledges()
-  const now = Date.now()
+  const now = nowUTC()
   let updated = false
   const nextPledges = pledges.map((p) => {
     if (p.userId !== userId || p.status !== 'active') return p
-    const ends = new Date(p.endsAt).getTime()
+    const ends = parseAsUTC(p.endsAt)
     if (now < ends) return p
     const amount = Number(p.amount) || 0
     const dailyYield = Number(p.dailyYieldPercent) || 0
@@ -44,7 +45,7 @@ function settleMaturedPledges(userId: string): void {
   savePledges(nextPledges)
   const users = getUsers()
   const matured = pledges.filter(
-    (p) => p.userId === userId && p.status === 'active' && new Date(p.endsAt).getTime() <= now
+    (p) => p.userId === userId && p.status === 'active' && parseAsUTC(p.endsAt) <= now
   )
   let credit = 0
   for (const p of matured) {
@@ -65,7 +66,7 @@ export function getPledgesForUser(userId: string): { pledges: Pledge[]; stats: P
   settleMaturedPledges(userId)
   const all = loadPledges()
   const userPledges = all.filter((p) => String(p.userId) === String(userId))
-  const now = Date.now()
+  const now = nowUTC()
   let amountMined = 0
   let todayEarnings = 0
   let cumulativeIncome = 0
@@ -73,8 +74,8 @@ export function getPledgesForUser(userId: string): { pledges: Pledge[]; stats: P
     const amount = Number(p.amount) || 0
     const dailyYield = Number(p.dailyYieldPercent) || 0
     const cycleDays = Number(p.cycleDays) || 1
-    const created = new Date(p.createdAt).getTime()
-    const ends = new Date(p.endsAt).getTime()
+    const created = parseAsUTC(p.createdAt)
+    const ends = parseAsUTC(p.endsAt)
     const elapsedDays = Math.min(cycleDays, (now - created) / 86400000)
     const dailyEarn = amount * (dailyYield / 100)
     if (p.status === 'active' && now < ends) {
@@ -88,7 +89,7 @@ export function getPledgesForUser(userId: string): { pledges: Pledge[]; stats: P
     }
   }
   return {
-    pledges: userPledges.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
+    pledges: userPledges.sort((a, b) => parseAsUTC(b.createdAt) - parseAsUTC(a.createdAt)),
     stats: {
       amountMined: Math.round(amountMined * 100) / 100,
       todayEarnings: Math.round(todayEarnings * 100) / 100,
@@ -114,9 +115,9 @@ export function createPledgeInStore(
   if ((user.balanceUsdt ?? 0) < amount) return { success: false, error: 'Insufficient balance' }
   if (user.locked) return { success: false, error: 'Account locked' }
   if (user.balanceFrozen) return { success: false, error: 'Balance frozen' }
-  const endsAt = new Date(Date.now() + plan.cycleDays * 86400000).toISOString().slice(0, 19).replace('T', ' ')
+  const endsAt = new Date(nowUTC() + plan.cycleDays * 86400000).toISOString().slice(0, 19).replace('T', ' ')
   const pledge: Pledge = {
-    id: `pledge_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
+    id: `pledge_${nowUTC()}_${Math.random().toString(36).slice(2, 9)}`,
     userId,
     userEmail,
     planId,
@@ -125,7 +126,7 @@ export function createPledgeInStore(
     cycleDays: plan.cycleDays,
     status: 'active',
     totalEarned: 0,
-    createdAt: new Date().toISOString(),
+    createdAt: isoStringUTC(),
     endsAt,
   }
   const pledges = loadPledges()
@@ -139,5 +140,5 @@ export function createPledgeInStore(
 }
 
 export function getAllPledges(): Pledge[] {
-  return loadPledges().sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+  return loadPledges().sort((a, b) => parseAsUTC(b.createdAt) - parseAsUTC(a.createdAt))
 }

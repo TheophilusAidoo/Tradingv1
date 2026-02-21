@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { adminPageStyles } from './adminStyles'
 import { getOrderEndsAt } from '../data/tradesStore'
+import { nowUTC, formatCountdownShortUTC, formatDateUTC } from '../utils/dateUtils'
 import { useAdminFeaturesOrders, useSettleFeaturesOrder, useProcessExpiredOrders } from '../hooks/useApiTrades'
 import { parseLeverValue } from '../data/featuresConfigStore'
 import type { FeaturesOrderResult } from '../types/admin'
@@ -85,9 +86,8 @@ export function AdminFeaturesOrders() {
                 const leverNum = parseLeverValue(t.lever ?? '1x')
                 const payoutWin = t.amount + t.amount * (periodPercent / 100) * leverNum
                 const endsAt = getOrderEndsAt(t)
-                const now = Date.now()
-                const secLeft = Math.max(0, Math.floor((endsAt - now) / 1000))
-                const timeStr = secLeft > 0 ? `${Math.floor(secLeft / 60)}:${String(secLeft % 60).padStart(2, '0')}` : 'Expired'
+                const secLeft = Math.max(0, Math.floor((endsAt - nowUTC()) / 1000))
+                const timeStr = secLeft > 0 ? formatCountdownShortUTC(endsAt) : 'Expired'
                 const isSettling = settlingId === t.id
                 return (
                   <tr key={t.id}>
@@ -130,7 +130,7 @@ export function AdminFeaturesOrders() {
                     <td>{t.lever}</td>
                     <td>{payoutWin.toFixed(2)} USDT</td>
                     <td style={{ fontSize: 12, fontWeight: secLeft <= 0 ? 700 : 500 }}>{timeStr}</td>
-                    <td style={{ fontSize: 12 }}>{new Date(t.createdAt).toLocaleString()}</td>
+                    <td style={{ fontSize: 12 }}>{formatDateUTC(t.createdAt, { dateStyle: 'short', timeStyle: 'short' })}</td>
                   </tr>
                 )
               })}
@@ -181,7 +181,7 @@ export function AdminFeaturesOrders() {
                     </span>
                   </td>
                   <td style={{ fontWeight: 600 }}>{(t.payoutAmount ?? 0).toFixed(2)} USDT</td>
-                  <td style={{ fontSize: 12 }}>{t.settledAt ? new Date(t.settledAt).toLocaleString() : '—'}</td>
+                  <td style={{ fontSize: 12 }}>{t.settledAt ? formatDateUTC(t.settledAt, { dateStyle: 'short', timeStyle: 'short' }) : '—'}</td>
                 </tr>
               ))}
             </tbody>

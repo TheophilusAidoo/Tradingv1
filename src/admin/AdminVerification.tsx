@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { IoCheckmarkCircleOutline, IoDocumentTextOutline } from './adminIcons'
 import { useAdmin } from '../contexts/AdminContext'
 import type { UserDocument } from '../types/admin'
+import { formatDateUTC } from '../utils/dateUtils'
 import { adminPageStyles } from './adminStyles'
 
 function DocPreviewModal({ doc, onClose }: { doc: UserDocument; onClose: () => void }) {
@@ -208,7 +209,7 @@ export function AdminVerification() {
                   </td>
                   <td style={{ fontSize: 13, color: '#71717a' }}>
                     {u.documents.length > 0
-                      ? new Date(u.documents[u.documents.length - 1].uploadedAt).toLocaleDateString(undefined, { dateStyle: 'short' })
+                      ? formatDateUTC(u.documents[u.documents.length - 1].uploadedAt, { dateStyle: 'short' })
                       : '—'}
                   </td>
                   <td>

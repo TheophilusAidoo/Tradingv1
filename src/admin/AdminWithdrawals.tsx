@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { IoCheckmarkCircleOutline, IoCloseCircleOutline } from './adminIcons'
 import { useAdmin } from '../contexts/AdminContext'
+import { formatDateUTC } from '../utils/dateUtils'
 import { adminPageStyles } from './adminStyles'
 
 export function AdminWithdrawals() {
@@ -55,7 +56,7 @@ export function AdminWithdrawals() {
                         )}
                       </div>
                     </td>
-                    <td>{new Date(w.createdAt).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })}</td>
+                    <td>{formatDateUTC(w.createdAt, { dateStyle: 'short', timeStyle: 'short' })}</td>
                     <td>
                       <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                         <button type="button" className="admin-btn admin-btn-primary" onClick={() => acceptWithdrawal(w.id)}>
@@ -118,7 +119,7 @@ export function AdminWithdrawals() {
                       {w.status}
                     </span>
                   </td>
-                  <td>{new Date(w.createdAt).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })}</td>
+                  <td>{formatDateUTC(w.createdAt, { dateStyle: 'short', timeStyle: 'short' })}</td>
                 </tr>
               ))}
             </tbody>

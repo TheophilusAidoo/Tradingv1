@@ -7,6 +7,7 @@ import {
   type ReferralCode,
 } from '../data/referralCodesStore'
 import { isApiConfigured, apiGetReferralCodes, apiGenerateReferralCode } from '../data/apiBridge'
+import { formatDateUTC } from '../utils/dateUtils'
 
 export function AdminReferralCodes() {
   const [codes, setCodes] = useState<ReferralCode[]>(() =>
@@ -143,10 +144,10 @@ export function AdminReferralCodes() {
                     {c.usedBy ?? '—'}
                   </td>
                   <td style={{ color: '#71717a', fontSize: 13 }}>
-                    {c.usedAt ? new Date(c.usedAt).toLocaleString() : '—'}
+                    {c.usedAt ? formatDateUTC(c.usedAt, { dateStyle: 'short', timeStyle: 'short' }) : '—'}
                   </td>
                   <td style={{ color: '#71717a', fontSize: 13 }}>
-                    {new Date(c.createdAt).toLocaleDateString()}
+                    {formatDateUTC(c.createdAt, { dateStyle: 'short' })}
                   </td>
                   <td>
                     {c.status === 'available' && (

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { isApiConfigured, apiGetPledges } from '../data/apiBridge'
 import { getAllPledges } from '../data/pledgesStore'
+import { formatCountdownUTC, formatDateUTC } from '../utils/dateUtils'
 
 const PLAN_LABELS: Record<string, string> = {
   newuser: 'New user',
@@ -9,23 +10,13 @@ const PLAN_LABELS: Record<string, string> = {
 }
 
 function formatCountdown(endsAt: string): string {
-  if (!endsAt || typeof endsAt !== 'string') return '0:00:00'
-  const normalized = endsAt.includes(' ') && !endsAt.includes('T') ? endsAt.replace(' ', 'T') : endsAt
-  const end = new Date(normalized).getTime()
-  const now = Date.now()
-  if (Number.isNaN(end) || now >= end) return 'Done'
-  const diff = Math.max(0, Math.floor((end - now) / 1000))
-  const h = Math.floor(diff / 3600)
-  const m = Math.floor((diff % 3600) / 60)
-  const s = diff % 60
-  return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+  const s = formatCountdownUTC(endsAt)
+  return s === '0:00:00' ? 'Done' : s
 }
 
 function formatDate(dateStr: string): string {
-  if (!dateStr || typeof dateStr !== 'string') return '-'
-  const normalized = dateStr.includes(' ') && !dateStr.includes('T') ? dateStr.replace(' ', 'T') : dateStr
-  const d = new Date(normalized)
-  return Number.isNaN(d.getTime()) ? '-' : d.toLocaleString()
+  const s = formatDateUTC(dateStr)
+  return s || '-'
 }
 
 interface PledgeRow {
@@ -52,7 +43,7 @@ export function AdminPledges() {
       if (isApiConfigured()) {
         const list = await apiGetPledges()
         setPledges(
-          (list as Record<string, unknown>[]).map((p) => ({
+          (list as unknown as Record<string, unknown>[]).map((p) => ({
             id: String(p.id ?? ''),
             userEmail: String(p.userEmail ?? p.user_email ?? ''),
             planId: String(p.planId ?? p.plan_id ?? ''),

@@ -1,4 +1,5 @@
 import type { AdminUser, UserDocument } from '../types/admin'
+import { nowUTC, isoStringUTC } from '../utils/dateUtils'
 
 const USERS_KEY = 'river_users'
 const CURRENT_USER_ID_KEY = 'river_current_user_id'
@@ -43,7 +44,7 @@ export function setCurrentUserId(id: string | null) {
 
 export function addDocumentForUser(userId: string, doc: Omit<UserDocument, 'uploadedAt'>): AdminUser[] {
   const users = loadUsers()
-  const docWithDate: UserDocument = { ...doc, uploadedAt: new Date().toISOString() }
+  const docWithDate: UserDocument = { ...doc, uploadedAt: isoStringUTC() }
   const next = users.map((u) =>
     u.id === userId ? { ...u, documents: [...u.documents, docWithDate] } : u
   )
@@ -130,12 +131,12 @@ export function deleteUserInStore(userId: string): AdminUser[] | null {
 
 export function addUser(email: string, name?: string, referralCodeUsed?: string): AdminUser {
   const users = loadUsers()
-  const id = `user_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`
+  const id = `user_${nowUTC()}_${Math.random().toString(36).slice(2, 9)}`
   const newUser: AdminUser = {
     id,
     email,
     name: name ?? email.split('@')[0] ?? 'User',
-    registeredAt: new Date().toISOString(),
+    registeredAt: isoStringUTC(),
     balanceUsdt: 0,
     status: 'approved',
     documents: [],

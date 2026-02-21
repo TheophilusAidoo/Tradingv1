@@ -1,5 +1,6 @@
 import { IoCheckmarkCircleOutline, IoCloseCircleOutline } from './adminIcons'
 import { useAdmin } from '../contexts/AdminContext'
+import { formatDateUTC } from '../utils/dateUtils'
 import { adminPageStyles } from './adminStyles'
 
 const API_BASE = (import.meta as { env?: { VITE_API_URL?: string } }).env?.VITE_API_URL ?? ''
@@ -54,7 +55,7 @@ export function AdminDeposits() {
                         <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>—</span>
                       )}
                     </td>
-                    <td>{new Date(d.createdAt).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })}</td>
+                    <td>{formatDateUTC(d.createdAt, { dateStyle: 'short', timeStyle: 'short' })}</td>
                     <td>
                       <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                         <button type="button" className="admin-btn admin-btn-primary" onClick={() => acceptDeposit(d.id)}>
@@ -114,7 +115,7 @@ export function AdminDeposits() {
                       {d.status}
                     </span>
                   </td>
-                  <td>{new Date(d.createdAt).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })}</td>
+                  <td>{formatDateUTC(d.createdAt, { dateStyle: 'short', timeStyle: 'short' })}</td>
                 </tr>
               ))}
             </tbody>

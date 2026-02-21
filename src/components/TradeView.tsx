@@ -6,6 +6,7 @@ import { useUserTrades, useSpotTrade } from '../hooks/useApiTrades'
 import type { Trade } from '../types/admin'
 import { PairSelectorModal } from './PairSelectorModal'
 import type { CryptoPair } from '../data/crypto'
+import { formatDateUTC } from '../utils/dateUtils'
 
 interface TradeViewProps {
   pair?: string
@@ -374,7 +375,7 @@ export function TradeView({ pair = 'ETH/USDT', lastPrice, change24h, list = [], 
 
 function TradeHistoryRow({ trade }: { trade: Trade }) {
   const isBuy = trade.side === 'buy'
-  const date = new Date(trade.createdAt).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })
+  const date = formatDateUTC(trade.createdAt, { dateStyle: 'short', timeStyle: 'short' })
   return (
     <div
       style={{

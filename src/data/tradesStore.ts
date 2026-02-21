@@ -1,6 +1,7 @@
 import type { Trade, FeaturesOrderResult } from '../types/admin'
 import { getUsers, saveUsersToStore } from './verificationStore'
 import { parseLeverValue } from './featuresConfigStore'
+import { parseAsUTC, nowUTC, isoStringUTC } from '../utils/dateUtils'
 
 const TRADES_KEY = 'river_trades'
 
@@ -22,7 +23,7 @@ function saveTrades(trades: Trade[]) {
 export function getTradesForUser(userId: string): Trade[] {
   return loadTrades()
     .filter((t) => t.userId === userId)
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .sort((a, b) => parseAsUTC(b.createdAt) - parseAsUTC(a.createdAt))
 }
 
 export function getAllTrades(): Trade[] {
@@ -74,7 +75,7 @@ export function executeSpotTrade(userId: string, pair: string, side: 'buy' | 'se
   }
 
   const trade: Trade = {
-    id: `trade_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
+    id: `trade_${nowUTC()}_${Math.random().toString(36).slice(2, 9)}`,
     userId,
     type: 'spot',
     pair,
@@ -82,7 +83,7 @@ export function executeSpotTrade(userId: string, pair: string, side: 'buy' | 'se
     price,
     quantity,
     amount,
-    createdAt: new Date().toISOString(),
+    createdAt: isoStringUTC(),
   }
   const trades = loadTrades()
   trades.push(trade)
@@ -111,7 +112,7 @@ export function executeFeaturesOrder(
   saveUsersToStore(nextUsers)
 
   const trade: Trade = {
-    id: `trade_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
+    id: `trade_${nowUTC()}_${Math.random().toString(36).slice(2, 9)}`,
     userId,
     userEmail,
     type: 'features',
@@ -120,7 +121,7 @@ export function executeFeaturesOrder(
     price: 0,
     quantity: amount,
     amount,
-    createdAt: new Date().toISOString(),
+    createdAt: isoStringUTC(),
     period: periodSeconds,
     periodPercent,
     lever,
@@ -141,7 +142,7 @@ export function getPendingFeaturesOrders(): Trade[] {
 export function getAllFeaturesOrders(): Trade[] {
   return loadTrades()
     .filter((t) => t.type === 'features')
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .sort((a, b) => parseAsUTC(b.createdAt) - parseAsUTC(a.createdAt))
 }
 
 function calcPayoutOnWin(stake: number, periodPercent: number, lever: string): number {
@@ -150,9 +151,9 @@ function calcPayoutOnWin(stake: number, periodPercent: number, lever: string): n
   return stake + profit
 }
 
-/** Returns endsAt timestamp (ms) for a features order */
+/** Returns endsAt timestamp (ms) for a features order. Uses UTC. */
 export function getOrderEndsAt(trade: Trade): number {
-  const created = new Date(trade.createdAt).getTime()
+  const created = parseAsUTC(String(trade.createdAt ?? ''))
   const periodSec = trade.period ?? 120
   return created + periodSec * 1000
 }
@@ -182,7 +183,7 @@ function applySettlement(trades: Trade[], idx: number): void {
     ...trade,
     featuresStatus: 'settled',
     payoutAmount: payout,
-    settledAt: new Date().toISOString(),
+    settledAt: isoStringUTC(),
   }
 }
 
@@ -197,7 +198,7 @@ export function settleFeaturesOrder(tradeId: string, result: FeaturesOrderResult
     return { success: false, error: 'Order already settled' }
   }
 
-  const now = Date.now()
+  const now = nowUTC()
   const endsAt = getOrderEndsAt(trade)
   const timeExpired = now >= endsAt
 
@@ -215,7 +216,7 @@ export function settleFeaturesOrder(tradeId: string, result: FeaturesOrderResult
 export function processExpiredFeaturesOrders(): number {
   const trades = loadTrades()
   let count = 0
-  const now = Date.now()
+  const now = nowUTC()
   for (let i = 0; i < trades.length; i++) {
     const t = trades[i]
     if (t.type !== 'features' || t.featuresStatus !== 'pending') continue

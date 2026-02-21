@@ -1,5 +1,6 @@
 import type { WithdrawalRequest } from '../types/admin'
-import { getUsers, saveUsersToStore, addFrozenToUser, removeFrozenFromUser, deductBalanceAndFrozen } from './verificationStore'
+import { nowUTC, isoStringUTC } from '../utils/dateUtils'
+import { addFrozenToUser, removeFrozenFromUser, deductBalanceAndFrozen } from './verificationStore'
 
 const WITHDRAWALS_KEY = 'river_withdrawals'
 
@@ -25,13 +26,13 @@ export function getWithdrawals(): WithdrawalRequest[] {
 export function createWithdrawal(userId: string, userEmail: string, amount: number, currency: string, walletAddress?: string, walletNetwork?: string): WithdrawalRequest[] {
   const requests = load()
   const req: WithdrawalRequest = {
-    id: `wd-${Date.now()}`,
+    id: `wd-${nowUTC()}`,
     userId,
     userEmail,
     amount,
     currency,
     status: 'pending',
-    createdAt: new Date().toISOString(),
+    createdAt: isoStringUTC(),
     walletAddress: walletAddress ?? null,
     walletNetwork: walletNetwork ?? null,
   }
