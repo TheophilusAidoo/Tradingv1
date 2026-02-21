@@ -5,13 +5,16 @@ import { formatDateUTC } from '../utils/dateUtils'
 import { api } from '../api/client'
 
 const API_BASE = (import.meta as { env?: { VITE_API_URL?: string } }).env?.VITE_API_URL ?? ''
+const APP_BASE = (import.meta as { env?: { VITE_APP_BASE?: string } }).env?.VITE_APP_BASE ?? (API_BASE.replace(/\/api\/?$/, '') || '/River%20trading')
 
+/** Build URL to serve MSB images directly from uploads/ (bypasses API, more reliable) */
 function buildMsbImageUrl(filename: string): string {
   if (!filename?.trim()) return ''
   if (filename.startsWith('http')) return filename
-  const base = API_BASE.replace(/\/$/, '')
-  const path = base.startsWith('/') ? base : `/${base}`
-  return `${window.location.origin}${path}/msb/${encodeURIComponent(filename)}`
+  // Use only the basename to prevent path traversal; backend stores safe filenames
+  const safe = filename.replace(/^.*[\\/]/, '')
+  const base = APP_BASE.startsWith('/') ? APP_BASE : `/${APP_BASE}`
+  return `${window.location.origin}${base.replace(/\/$/, '')}/uploads/msb/${encodeURIComponent(safe)}`
 }
 
 interface MsbApproval {
@@ -139,7 +142,16 @@ export function AdminMsbApprovals() {
                           src={buildMsbImageUrl(m.frontUrl)}
                           alt="Front"
                           style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          onError={(e) => {
+                            const el = e.target as HTMLImageElement
+                            el.style.display = 'none'
+                            const fallback = el.parentElement?.querySelector('.msb-fallback') as HTMLElement
+                            if (fallback) fallback.style.display = 'flex'
+                          }}
                         />
+                        <div className="msb-fallback" style={{ display: 'none', width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.2)', fontSize: 11, color: '#71717a' }}>
+                          Image unavailable
+                        </div>
                       </a>
                       <a href={buildMsbImageUrl(m.frontUrl)} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: 'var(--accent)', marginTop: 4, display: 'block' }}>
                         View full
@@ -158,9 +170,15 @@ export function AdminMsbApprovals() {
                           alt="Back"
                           style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                           onError={(e) => {
-                            (e.target as HTMLImageElement).style.display = 'none'
+                            const el = e.target as HTMLImageElement
+                            el.style.display = 'none'
+                            const fallback = el.parentElement?.querySelector('.msb-fallback') as HTMLElement
+                            if (fallback) fallback.style.display = 'flex'
                           }}
                         />
+                        <div className="msb-fallback" style={{ display: 'none', width: '100%', height: '100%', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.2)', fontSize: 11, color: '#71717a' }}>
+                          Image unavailable
+                        </div>
                       </a>
                       <a href={buildMsbImageUrl(m.backUrl)} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: 'var(--accent)', marginTop: 4, display: 'block' }}>
                         View full
