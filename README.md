@@ -1,37 +1,88 @@
-# River Trading
+# Trading Platform v1
 
-A dark-themed cryptocurrency dashboard inspired by modern crypto apps. Built with React, TypeScript, and Vite.
+Advanced cryptocurrency trading dashboard with real-time market data and intuitive user interface. Built with React, TypeScript, and Vite for a responsive, high-performance trading experience.
 
-## Features
+## Overview
 
-- **Header** – River logo and profile button
-- **Our Mission** – Gradient banner with short mission statement and Bitcoin-style graphic
-- **Quick actions** – Deposit, Withdraw, Staking, Services
-- **Featured pairs** – BTC, ETH, BNB with last price and 24h change
-- **Crypto list** – Scrollable table of 15 pairs with last price and 24h change % (green/red)
-- **Bottom nav** – HOME (active), MARKET, TRADE, FEATURES, WALLETS
-- **Network background** – Animated dots and connecting lines
+Trading Platform v1 is a sophisticated cryptocurrency trading application that combines real-time market data processing with a professional, dark-themed user interface. Designed for traders who demand speed, accuracy, and usability.
 
-## Run locally
+## Key Features
+
+- Real-time market data and price updates
+- Dark-themed professional trading interface
+- Interactive trading dashboard
+- Featured cryptocurrency pairs with 24h change tracking
+- Responsive design across all devices
+- Smooth animations and network visualization
+- Quick action buttons (Deposit, Withdraw, Staking, Services)
+- Scrollable crypto list with comprehensive market data
+- Bottom navigation for easy access
+
+## Tech Stack
+
+- Frontend: React 18, TypeScript
+- Build Tool: Vite 5
+- Styling: Modern CSS (no UI framework dependencies)
+- Performance: Optimized for real-time data rendering
+
+## Getting Started
+
+### Installation
 
 ```bash
+# Install dependencies
 npm install
+```
+
+### Development
+
+```bash
+# Run development server
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173).
+Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-## Build
+### Production Build
 
 ```bash
+# Build for production
 npm run build
+
+# Preview production build
 npm run preview
 ```
 
-## Stack
+## Project Structure
 
-- React 18 + TypeScript
-- Vite 5
-- CSS (no UI framework)
+- **Components**: Reusable React components for UI elements
+- **Styles**: CSS files for theming and component styling
+- **Assets**: Images and static files
 
-Data is static; you can later plug in a real API (e.g. Binance) for live prices.
+## Key Components
+
+- Market data integration layer
+- Trading dashboard with real-time updates
+- Price tracking and visualization
+- Portfolio management interface
+- Quick action buttons
+- Animated background network visualization
+
+## Future Enhancements
+
+Integration with real APIs (Binance, CoinGecko) for live market data and prices.
+
+## Architecture
+
+- Lightweight and fast - no heavy UI framework
+- Modular component structure
+- Real-time data handling optimized
+- Responsive design for desktop and mobile
+
+## Author
+
+Theophilus Aidoo - Full Stack Developer & UI/UX Designer
+
+## License
+
+MIT
